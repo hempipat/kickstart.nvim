@@ -23,6 +23,9 @@ return {
 
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
+    'mfussenegger/nvim-dap-python',
+
+    'theHamsta/nvim-dap-virtual-text',
   },
   keys = {
     -- Basic debugging keymaps, feel free to change to your liking!
@@ -95,6 +98,8 @@ return {
       ensure_installed = {
         -- Update this to ensure that you have the debuggers for the langs you want
         'delve',
+        'python',
+        'java',
       },
     }
 
@@ -105,19 +110,19 @@ return {
       --    Feel free to remove or use ones that you like more! :)
       --    Don't feel like these are good choices.
       icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
-      controls = {
-        icons = {
-          pause = '⏸',
-          play = '▶',
-          step_into = '⏎',
-          step_over = '⏭',
-          step_out = '⏮',
-          step_back = 'b',
-          run_last = '▶▶',
-          terminate = '⏹',
-          disconnect = '⏏',
-        },
-      },
+      -- controls = {
+      --   icons = {
+      --     pause = '⏸',
+      --     play = '▶',
+      --     step_into = '⏎',
+      --     step_over = '⏭',
+      --     step_out = '⏮',
+      --     step_back = 'b',
+      --     run_last = '▶▶',
+      --     terminate = '⏹',
+      --     disconnect = '⏏',
+      --   },
+      -- },
     }
 
     -- Change breakpoint icons
@@ -144,5 +149,32 @@ return {
         detached = vim.fn.has 'win32' == 0,
       },
     }
+    require('nvim-dap-virtual-text').setup {
+      commented = true,
+      --- A callback that determines how a variable is displayed or whether it should be omitted
+      --- @param variable Variable https://microsoft.github.io/debug-adapter-protocol/specification#Types_Variable
+      --- @param buf number
+      --- @param stackframe dap.StackFrame https://microsoft.github.io/debug-adapter-protocol/specification#Types_StackFrame
+      --- @param node userdata tree-sitter node identified as variable definition of reference (see `:h tsnode`)
+      --- @param options nvim_dap_virtual_text_options Current options for nvim-dap-virtual-text
+      --- @return string|nil A text how the virtual text should be displayed or nil, if this variable shouldn't be displayed
+      display_callback = function(variable, buf, stackframe, node, options)
+        -- by default, strip out new line characters
+        if options.virt_text_pos == 'inline' then
+          return ' = ' .. variable.value:gsub('%s+', ' ')
+        else
+          return variable.name .. ' = ' .. variable.value:gsub('%s+', ' ')
+        end
+      end,
+
+      virt_text_pos = vim.fn.has 'nvim-0.10' == 1 and 'inline' or 'eol',
+    }
+    -- {
+    --   config = function()
+    --     local dap_python = require 'dap-python'
+    --     dap_python.setup '~/.virtualenvs/debugpy/bin/python'
+    --   end,
+    -- }
+    require('dap-python').setup '~/.virtualenvs/debugpy/bin/python'
   end,
 }
