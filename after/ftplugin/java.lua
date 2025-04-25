@@ -15,13 +15,18 @@ local workspace_path = home .. '/jdtls-workspace/'
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 local workspace_dir = workspace_path .. project_name
 
+local java_path17 = '~/.sdkman/candidates/java/17.0.14-tem'
+local java_path17aarch64 = '/opt/'
+local java_path21 = '~/.sdkman/candidates/java/21.0.7-tem'
+
 -- Determine OS
 local os_config = 'linux'
 if vim.fn.has 'mac' == 1 then
   os_config = 'mac'
 end
 
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
+-- local capabilities = require('cmp_nvim_lsp').default_capabilities()
+local capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities())
 
 local extendedClientCapabilities = jdtls.extendedClientCapabilities
 extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
@@ -43,7 +48,7 @@ local config = {
     '-Declipse.product=org.eclipse.jdt.ls.core.product',
     '-Dlog.protocol=true',
     '-Dlog.level=ALL',
-    '-Xms1g',
+    '-Xms2g',
     '--add-modules=ALL-SYSTEM',
     '--add-opens',
     'java.base/java.util=ALL-UNNAMED',
@@ -68,12 +73,12 @@ local config = {
       },
       configuration = {
         updateBuildConfiguration = 'interactive',
-        -- runtimes = {
-        -- 	{
-        -- 		name = "JavaSE-17",
-        -- 		path = "~/.sdkman/candidates/java/17.0.11-tem/",
-        -- 	},
-        -- },
+        runtimes = {
+          {
+            name = 'JavaSE-17',
+            path = java_path17,
+          },
+        },
       },
       maven = {
         downloadSources = true,
@@ -168,7 +173,8 @@ local config = {
     bundles = bundles,
   },
   on_attach = function()
-    -- require("jdtls").setup_dap()
+    -- require('jdtls').setup_dap { hotcodereplace = 'auto' }
+    jdtls.setup_dap { hotcodereplace = 'auto' }
 
     vim.keymap.set('n', '<leader>oi', function()
       jdtls.organize_imports()
