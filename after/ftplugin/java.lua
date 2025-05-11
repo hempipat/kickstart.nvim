@@ -15,7 +15,7 @@ local workspace_path = home .. '/jdtls-workspace/'
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 local workspace_dir = workspace_path .. project_name
 
-local java_path17 = '~/.sdkman/candidates/java/17.0.14-tem'
+local java_path17 = '~/.sdkman/candidates/java/17.0.15-tem'
 local java_path17aarch64 = '/opt/'
 local java_path21 = '~/.sdkman/candidates/java/21.0.7-tem'
 
@@ -63,6 +63,10 @@ local config = {
     workspace_dir,
   },
   root_dir = require('jdtls.setup').find_root { '.git', 'mvnw', 'gradlew', 'pom.xml', 'build.gradle' },
+  on_exit = function(client)
+    print 'jdtls is shutting down'
+    client:stop()
+  end,
   -- on_attach = on_attach,
   capabilities = capabilities,
 
