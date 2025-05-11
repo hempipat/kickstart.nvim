@@ -156,11 +156,13 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+vim.opt.termguicolors = true
 -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
 -- instead raise a dialog asking if you wish to save the current file(s)
 -- See `:help 'confirm'`
 vim.opt.confirm = true
 
+vim.opt.colorcolumn = '120'
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -214,13 +216,49 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
--- vim.api.nvim_create_autocmd('FileType', {
---   pattern = { 'dap-repl', 'dapui_watches', 'dapui_hover' },
+vim.api.nvim_create_autocmd('ColorScheme', {
+  pattern = '*',
+  callback = function()
+    vim.api.nvim_set_hl(0, 'ColorColumn', { bg = '#2e3440' })
+  end,
+})
+
+vim.api.nvim_create_autocmd('BufWritePost', {
+  desc = 'Show only filename',
+  group = vim.api.nvim_create_augroup('ShowOnlyFilename', { clear = true }),
+  callback = function()
+    vim.fn.expand '%:t'
+  end,
+})
+
+-- local layout = require 'test'
+-- print(layout)
+
+-- vim.api.nvim_create_autocmd('ModeChanged', {
+--   pattern = '*',
 --   callback = function()
---     vim.b.completion = true
+--     print 'Key mapping added!'
 --   end,
---   desc = 'Enable completion for DAP-REPL filetypes',
 -- })
+--
+
+vim.o.langmap = 'รi'
+
+local function check_keyboard_layout()
+  local cmd =
+    'pwsh.exe -NoProfile -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.InputLanguage]::CurrentInputLanguage.Culture.Name"'
+  local layout = vim.fn.system(cmd):gsub('[\n\r%s]+', '')
+  if layout == 'th-TH' then
+    vim.notify('You use Thai keyboard layout', 'info')
+  end
+end
+
+vim.api.nvim_create_autocmd('ModeChanged', {
+  pattern = '*:n',
+  callback = function()
+    check_keyboard_layout()
+  end,
+})
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -487,7 +525,23 @@ require('lazy').setup({
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
-      { 'j-hui/fidget.nvim', opts = {} },
+      {
+        'j-hui/fidget.nvim',
+        opts = {
+          notification = {
+            window = {
+              winblend = 0,
+            },
+          },
+          progress = {
+            ignore = { 'null-ls' },
+            display = {
+              done_icon = '✔',
+              progress_icon = { pattern = 'dots' },
+            },
+          },
+        },
+      },
 
       -- Allows extra capabilities provided by blink.cmp
       'saghen/blink.cmp',
@@ -614,6 +668,16 @@ require('lazy').setup({
             })
           end
 
+          -- Config border
+          local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+          function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+            opts = opts or {}
+            opts.max_width = 80
+            opts.max_height = 20
+            opts.border = opts.border or 'rounded'
+            return orig_util_open_floating_preview(contents, syntax, opts, ...)
+          end
+
           -- The following code creates a keymap to toggle inlay hints in your
           -- code, if the language server you are using supports them
           --
@@ -632,14 +696,16 @@ require('lazy').setup({
         severity_sort = true,
         float = { border = 'rounded', source = 'if_many' },
         underline = { severity = vim.diagnostic.severity.ERROR },
-        signs = vim.g.have_nerd_font and {
-          text = {
-            [vim.diagnostic.severity.ERROR] = '󰅚 ',
-            [vim.diagnostic.severity.WARN] = '󰀪 ',
-            [vim.diagnostic.severity.INFO] = '󰋽 ',
-            [vim.diagnostic.severity.HINT] = '󰌶 ',
-          },
-        } or {},
+        signs = vim.g.have_nerd_font
+            and {
+              -- text = {
+              --   [vim.diagnostic.severity.ERROR] = '󰅚 ',
+              --   [vim.diagnostic.severity.WARN] = '󰀪 ',
+              --   [vim.diagnostic.severity.INFO] = '󰋽 ',
+              --   [vim.diagnostic.severity.HINT] = '󰌶 ',
+              -- },
+            }
+          or {},
         virtual_text = {
           source = 'if_many',
           spacing = 2,
@@ -684,28 +750,84 @@ require('lazy').setup({
         -- ts_ls = {},
         --
         lua_ls = {
-          -- cmd = { ... },
-          -- filetypes = { ... },
-          -- capabilities = {},
+          capabilities = capabilities,
           settings = {
             Lua = {
-              completion = {
-                callSnippet = 'Replace',
+              workspace = {
+                checkThirdParty = false,
               },
+              completion = {
+                workspaceWord = true,
+                callSnippet = 'Both',
+              },
+              misc = {
+                parameters = {
+                  -- "--log-level=trace",
+                },
+              },
+              hint = {
+                enable = true,
+                setType = false,
+                paramType = true,
+                paramName = 'Disable',
+                semicolon = 'Disable',
+                arrayIndex = 'Disable',
+              },
+              doc = {
+                privateName = { '^_' },
+              },
+              type = {
+                castNumberToInteger = true,
+              },
+              diagnostics = {
+                disable = { 'incomplete-signature-doc', 'trailing-space' },
+                -- enable = false,
+                groupSeverity = {
+                  strong = 'Warning',
+                  strict = 'Warning',
+                },
+                groupFileStatus = {
+                  ['ambiguity'] = 'Opened',
+                  ['await'] = 'Opened',
+                  ['codestyle'] = 'None',
+                  ['duplicate'] = 'Opened',
+                  ['global'] = 'Opened',
+                  ['luadoc'] = 'Opened',
+                  ['redefined'] = 'Opened',
+                  ['strict'] = 'Opened',
+                  ['strong'] = 'Opened',
+                  ['type-check'] = 'Opened',
+                  ['unbalanced'] = 'Opened',
+                  ['unused'] = 'Opened',
+                },
+                unusedLocalExclude = { '_*' },
+              },
+              format = {
+                enable = false,
+                defaultConfig = {
+                  indent_style = 'space',
+                  indent_size = '2',
+                  continuation_indent_size = '2',
+                },
+              },
+              -- completion = {
+              --   callSnippet = 'Replace',
+              -- },
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
               -- diagnostics = { disable = { 'missing-fields' } },
             },
           },
         },
         pylsp = {
+          capabilities = capabilities,
           settings = {
             pylsp = {
               plugins = {
-                pyflakes = { enabled = false },
-                pycodestyle = { enabled = false },
+                pyflakes = { enabled = true },
+                pycodestyle = { enabled = true },
                 autopep8 = { enabled = false },
                 yapf = { enabled = false },
-                mccabe = { enabled = false },
+                mccabe = { enabled = true },
                 pylsp_mypy = { enabled = false },
                 pylsp_black = { enabled = false },
                 pylsp_isort = { enabled = false },
@@ -713,52 +835,15 @@ require('lazy').setup({
             },
           },
         },
-        ts_ls = {
-          init_options = {
-            plugins = {
-              {
-                name = '@vue/typescript-plugin',
-                location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
-                languages = { 'vue' },
-              },
-            },
-          },
-          single_file_support = false,
-          settings = {
-            typescript = {
-              inlayHints = {
-                includeInlayParameterNameHints = 'literal',
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = false,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              },
-            },
-            javascript = {
-              inlayHints = {
-                includeInlayParameterNameHints = 'all',
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              },
-            },
-          },
-        },
         volar = {
           -- single_file_support = true,
+          filetypes = { 'vue' },
           init_options = {
             vue = {
               hybridMode = false,
             },
-            provideFormatter = false,
             emmet = { enable = false },
           },
-          -- filetype = { 'vue' },
           settings = {
             javascript = {
               inlayHints = {
@@ -782,49 +867,85 @@ require('lazy').setup({
             },
           },
         },
+        vtsls = {
+          filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
+          capabilities = capabilities,
+          settings = {
+            typescript = {
+              inlayHints = {
+                parameterNames = { enabled = 'all' },
+                parameterTypes = { enabled = true },
+                variableTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                enumMemberValues = { enabled = true },
+              },
+            },
+            javascript = {
+              inlayHints = {
+                parameterNames = { enabled = 'all' },
+                parameterTypes = { enabled = true },
+                variableTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                enumMemberValues = { enabled = true },
+              },
+            },
+            vtsls = {
+              enableVueSupport = true,
+            },
+          },
+        },
+        -- ts_ls = {
+        --   init_options = {
+        --     plugins = {
+        --       {
+        --         name = '@vue/typescript-plugin',
+        --         location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
+        --         languages = { 'vue' },
+        --       },
+        --     },
+        --   },
+        --   single_file_support = false,
+        --   settings = {
+        --     typescript = {
+        --       inlayHints = {
+        --         includeInlayParameterNameHints = 'literal',
+        --         includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        --         includeInlayFunctionParameterTypeHints = true,
+        --         includeInlayVariableTypeHints = false,
+        --         includeInlayPropertyDeclarationTypeHints = true,
+        --         includeInlayFunctionLikeReturnTypeHints = true,
+        --         includeInlayEnumMemberValueHints = true,
+        --       },
+        --     },
+        --     javascript = {
+        --       inlayHints = {
+        --         includeInlayParameterNameHints = 'all',
+        --         includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        --         includeInlayFunctionParameterTypeHints = true,
+        --         includeInlayVariableTypeHints = true,
+        --         includeInlayPropertyDeclarationTypeHints = true,
+        --         includeInlayFunctionLikeReturnTypeHints = true,
+        --         includeInlayEnumMemberValueHints = true,
+        --       },
+        --     },
+        --   },
+        -- },
 
         html = {
           filetype = { 'html', 'vue' },
-          --   configurationSection = { 'html', 'vue' },
-          --   embeddedLanguages = {
-          --     css = true,
-          --     javascript = true,
-          --   },
-          --   provideFormatter = true,
-          -- fingle_file_support = true,
         },
         tailwindcss = {},
         cssls = {
           filetypes = { 'css', 'scss', 'less' },
         },
-
-        emmet_language_server = {
-          filetypes = { 'vue', 'css', 'eruby', 'html', 'javascript', 'javascriptreact', 'less', 'sass', 'scss', 'pug', 'typescriptreact' },
-          init_options = {
-            ---@type table<string, string>
-            includeLanguages = {
-              vue = 'html',
-            },
-            --- @type string[]
-            excludeLanguages = {},
-            --- @type string[]
-            extensionsPath = {},
-            --- @type table<string, any> [Emmet Docs](https://docs.emmet.io/customization/preferences/)
-            preferences = {},
-            --- @type boolean Defaults to `true`
-            showAbbreviationSuggestions = true,
-            --- @type "always" | "never" Defaults to `"always"`
-            showExpandedAbbreviation = 'always',
-            --- @type boolean Defaults to `false`
-            showSuggestionsAsSnippets = false,
-            --- @type table<string, any> [Emmet Docs](https://docs.emmet.io/customization/syntax-profiles/)
-            syntaxProfiles = {
-              vue = 'html',
-            },
-            --- @type table<string, string> [Emmet Docs](https://docs.emmet.io/customization/snippets/#variables)
-            variables = {},
-          },
+        emmet_ls = {
+          filetypes = { 'vue', 'css', 'html', 'javascript', 'javascriptreact', 'less', 'sass', 'scss', 'typescriptreact' },
         },
+        gradle_ls = {},
+        bashls = {},
+        jsonls = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -940,8 +1061,6 @@ require('lazy').setup({
         },
         opts = {},
       },
-      'rcarriga/cmp-dap',
-      'mfussenegger/nvim-dap',
 
       'folke/lazydev.nvim',
     },
@@ -983,37 +1102,24 @@ require('lazy').setup({
       },
 
       completion = {
+        menu = {
+          border = 'rounded',
+          winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
+        },
+        ghost_text = { enabled = true },
         -- By default, you may press `<c-space>` to show the documentation.
         -- Optionally, set `auto_show = true` to show the documentation after a delay.
-        documentation = { auto_show = false, auto_show_delay_ms = 500 },
+        documentation = { auto_show = false, auto_show_delay_ms = 500, window = { border = 'rounded' } },
       },
 
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'lazydev', 'buffer' },
+        default = { 'lsp', 'path', 'snippets', 'lazydev' },
         providers = {
-          lsp = { score_offset = 2 },
-          path = { module = 'blink.cmp.sources.path', score_offset = 2 },
-          buffer = { module = 'blink.cmp.sources.buffer', score_offset = 3 },
-          snippets = { score_offset = -1 },
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
-          -- dap = {
-          --   score_offset = function()
-          --     return vim.bo.filetype == 'dap-repl' and 10 or -10
-          --   end,
-          --   providers = function()
-          --     return require('cmp_dap').get_completions()
-          --   end,
-          -- },
-
-          -- dap = { name = 'dap' },
         },
       },
 
       snippets = { preset = 'luasnip' },
-
-      -- enabled = function()
-      --   return not vim.tbl_contains({ 'lua', 'markdown' }, vim.bo.filetype)
-      -- end,
 
       -- it work
       -- enabled = function()
@@ -1021,13 +1127,6 @@ require('lazy').setup({
       --       or
       --       not vim.tbl_contains({ 'lua', 'markdown' }, vim.bo.filetype) and vim.bo.buftype ~= 'prompt' and
       --       vim.b.completion ~= false
-      -- end,
-
-      -- second not works ?
-      -- enabled = function()
-      --   return vim.bo.filetype == 'java'
-      --     or vim.bo.filetype == 'dap-repl'
-      --     or not vim.tbl_contains({ 'lua', 'markdown' }, vim.bo.filetype) and vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false
       -- end,
 
       -- Blink.cmp includes an optional, recommended rust fuzzy matcher,
@@ -1040,7 +1139,7 @@ require('lazy').setup({
       fuzzy = { implementation = 'lua' },
 
       -- Shows a signature help window while you type arguments for a function
-      signature = { enabled = true },
+      signature = { enabled = false },
     },
   },
 
@@ -1090,17 +1189,90 @@ require('lazy').setup({
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
-      local statusline = require 'mini.statusline'
+
+      local MiniStatusline = require 'mini.statusline'
+
+      local function my_fileinfo()
+        local devicons = require 'nvim-web-devicons'
+
+        local filename = vim.fn.expand '%:t'
+        local extension = vim.fn.expand '%:e'
+        local filetype = vim.bo.filetype
+        local encoding = (vim.bo.fenc ~= '' and vim.bo.fenc) or vim.o.enc
+        local fileformat = vim.bo.fileformat or ''
+
+        local icon, icon_highlight = devicons.get_icon(filename, extension, { default = true })
+
+        if vim.g.have_nerd_font then
+          return string.format('%s %s |  %s | %s', icon or '', filename, encoding, fileformat)
+        else
+          return string.format('%s | %s', encoding, filetype)
+        end
+      end
+
+      local function custom_filename()
+        local filename = vim.fn.expand '%:t'
+        if filename == '' then
+          filename = '[No Name]'
+        end
+        if vim.bo.modified then
+          filename = filename .. ' ●'
+        end
+        return filename
+      end
+
+      local function custom_lsp_info()
+        local buf_clients = vim.lsp.get_clients { bufnr = 0 }
+        if next(buf_clients) == nil then
+          return ''
+        end
+        local client_names = {}
+        for _, client in pairs(buf_clients) do
+          table.insert(client_names, client.name)
+        end
+        return 'LSP: ' .. table.concat(client_names, ', ')
+      end
+
+      MiniStatusline.setup {
+        set_vim_settings = true,
+        content = {
+          active = function()
+            local mode, mode_hl = MiniStatusline.section_mode { trunc_width = 120 }
+            local git = MiniStatusline.section_git { trunc_width = 75 }
+            local diff = MiniStatusline.section_diff { trunc_width = 75 }
+            local diagnostics = MiniStatusline.section_diagnostics { trunc_width = 75 }
+            local filename = custom_filename()
+            local fileinfo = MiniStatusline.section_fileinfo { trunc_width = 120 }
+            local lsp = MiniStatusline.section_lsp { trunc_width = 75 }
+
+            return MiniStatusline.combine_groups {
+              { hl = mode_hl, strings = { mode } },
+              { hl = 'MiniStatuslineDevinfo', strings = { git, diff, diagnostics, lsp } },
+              '%<',
+              { hl = 'MiniStatuslineFilename', strings = { filename } },
+              '%=',
+              { hl = 'MiniStatuslineFileinfo', strings = { fileinfo } },
+            }
+          end,
+          inactive = nil, -- default ไป
+          use_icons = vim.g.have_nerd_font,
+        },
+      }
+
+      vim.api.nvim_set_hl(0, 'MiniStatuslineModeNormal', { bg = '#88c0d0', fg = '#2e3440', bold = true })
+      vim.api.nvim_set_hl(0, 'MiniStatuslineModeInsert', { bg = '#a3be8c', fg = '#2e3440', bold = true })
+      vim.api.nvim_set_hl(0, 'MiniStatuslineFilename', { fg = '#d8dee9', bg = '#3b4252', bold = true })
+
       -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
+      -- statusline.setup { use_icons = vim.g.have_nerd_font }
 
       -- You can configure sections in the statusline by overriding their
       -- default behavior. For example, here we set the section for
       -- cursor location to LINE:COLUMN
       ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
+      -- statusline.section_location = function()
+      --   return '%2l:%-2v'
+      -- end
 
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
@@ -1199,4 +1371,6 @@ require('lazy').setup({
 })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
+-- vim: ts=2 sts=2 sw=2 et
+-- vim: ts=2 sts=2 sw=2 et
 -- vim: ts=2 sts=2 sw=2 et
