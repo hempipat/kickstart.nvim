@@ -843,103 +843,103 @@ require('lazy').setup({
             },
           },
         },
-        volar = {
-          -- single_file_support = true,
-          filetypes = { 'vue' },
-          init_options = {
-            vue = {
-              hybridMode = false,
-            },
-            emmet = { enable = false },
-          },
-          settings = {
-            javascript = {
-              inlayHints = {
-                enumMemberValues = {
-                  enabled = true,
-                },
-                functionLikeReturnTypes = {
-                  enabled = true,
-                },
-                propertyDeclarationTypes = {
-                  enabled = true,
-                },
-                parameterTypes = {
-                  enabled = true,
-                  suppressWhenArgumentMatchesName = true,
-                },
-                variableTypes = {
-                  enabled = true,
-                },
-              },
-            },
-          },
-        },
-        vtsls = {
-          filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
-          capabilities = capabilities,
-          settings = {
-            typescript = {
-              inlayHints = {
-                parameterNames = { enabled = 'all' },
-                parameterTypes = { enabled = true },
-                variableTypes = { enabled = true },
-                propertyDeclarationTypes = { enabled = true },
-                functionLikeReturnTypes = { enabled = true },
-                enumMemberValues = { enabled = true },
-              },
-            },
-            javascript = {
-              inlayHints = {
-                parameterNames = { enabled = 'all' },
-                parameterTypes = { enabled = true },
-                variableTypes = { enabled = true },
-                propertyDeclarationTypes = { enabled = true },
-                functionLikeReturnTypes = { enabled = true },
-                enumMemberValues = { enabled = true },
-              },
-            },
-            vtsls = {
-              enableVueSupport = true,
-            },
-          },
-        },
-        -- ts_ls = {
+        -- volar = {
+        --   -- single_file_support = true,
+        --   filetypes = { 'vue' },
         --   init_options = {
-        --     plugins = {
-        --       {
-        --         name = '@vue/typescript-plugin',
-        --         location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
-        --         languages = { 'vue' },
-        --       },
+        --     vue = {
+        --       hybridMode = false,
         --     },
+        --     emmet = { enable = false },
         --   },
-        --   single_file_support = false,
         --   settings = {
-        --     typescript = {
-        --       inlayHints = {
-        --         includeInlayParameterNameHints = 'literal',
-        --         includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-        --         includeInlayFunctionParameterTypeHints = true,
-        --         includeInlayVariableTypeHints = false,
-        --         includeInlayPropertyDeclarationTypeHints = true,
-        --         includeInlayFunctionLikeReturnTypeHints = true,
-        --         includeInlayEnumMemberValueHints = true,
-        --       },
-        --     },
         --     javascript = {
         --       inlayHints = {
-        --         includeInlayParameterNameHints = 'all',
-        --         includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-        --         includeInlayFunctionParameterTypeHints = true,
-        --         includeInlayVariableTypeHints = true,
-        --         includeInlayPropertyDeclarationTypeHints = true,
-        --         includeInlayFunctionLikeReturnTypeHints = true,
-        --         includeInlayEnumMemberValueHints = true,
+        --         enumMemberValues = {
+        --           enabled = true,
+        --         },
+        --         functionLikeReturnTypes = {
+        --           enabled = true,
+        --         },
+        --         propertyDeclarationTypes = {
+        --           enabled = true,
+        --         },
+        --         parameterTypes = {
+        --           enabled = true,
+        --           suppressWhenArgumentMatchesName = true,
+        --         },
+        --         variableTypes = {
+        --           enabled = true,
+        --         },
         --       },
         --     },
         --   },
         -- },
+        -- vtsls = {
+        --   filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
+        --   capabilities = capabilities,
+        --   settings = {
+        --     typescript = {
+        --       inlayHints = {
+        --         parameterNames = { enabled = 'all' },
+        --         parameterTypes = { enabled = true },
+        --         variableTypes = { enabled = true },
+        --         propertyDeclarationTypes = { enabled = true },
+        --         functionLikeReturnTypes = { enabled = true },
+        --         enumMemberValues = { enabled = true },
+        --       },
+        --     },
+        --     javascript = {
+        --       inlayHints = {
+        --         parameterNames = { enabled = 'all' },
+        --         parameterTypes = { enabled = true },
+        --         variableTypes = { enabled = true },
+        --         propertyDeclarationTypes = { enabled = true },
+        --         functionLikeReturnTypes = { enabled = true },
+        --         enumMemberValues = { enabled = true },
+        --       },
+        --     },
+        --     vtsls = {
+        --       enableVueSupport = true,
+        --     },
+        --   },
+        -- },
+        ts_ls = {
+          init_options = {
+            plugins = {
+              {
+                name = '@vue/typescript-plugin',
+                location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
+                languages = { 'vue' },
+              },
+            },
+          },
+          single_file_support = false,
+          settings = {
+            typescript = {
+              inlayHints = {
+                includeInlayParameterNameHints = 'literal',
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayVariableTypeHints = false,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayEnumMemberValueHints = true,
+              },
+            },
+            javascript = {
+              inlayHints = {
+                includeInlayParameterNameHints = 'all',
+                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                includeInlayFunctionParameterTypeHints = true,
+                includeInlayVariableTypeHints = true,
+                includeInlayPropertyDeclarationTypeHints = true,
+                includeInlayFunctionLikeReturnTypeHints = true,
+                includeInlayEnumMemberValueHints = true,
+              },
+            },
+          },
+        },
 
         html = {
           filetype = { 'html', 'vue' },

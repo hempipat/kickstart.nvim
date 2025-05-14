@@ -109,7 +109,7 @@ return {
   {
     'rcarriga/nvim-notify',
     config = function()
-      require('notify').setup {
+      require('notify.config').setup {
         stages = 'fade_in_slide_out',
         timeout = 3000,
         background_colour = '#000000',
@@ -154,7 +154,6 @@ return {
       vim.g.db_ui_save_location = home .. '/db_ui_queries'
     end,
   },
-
   -- Move like vim on Tmux
   {
     'christoomey/vim-tmux-navigator',
@@ -173,5 +172,8 @@ return {
       { '<c-l>', '<cmd><C-U>TmuxNavigateRight<cr>' },
       { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
     },
+  },
+  {
+    'xiyaowong/transparent.nvim',
   },
 }
