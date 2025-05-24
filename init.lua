@@ -677,14 +677,14 @@ require('lazy').setup({
           end
 
           -- Config border
-          local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
-          function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
-            opts = opts or {}
-            opts.max_width = 80
-            opts.max_height = 20
-            opts.border = opts.border or 'rounded'
-            return orig_util_open_floating_preview(contents, syntax, opts, ...)
-          end
+          -- local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
+          -- function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
+          --   opts = opts or {}
+          --   opts.max_width = 80
+          --   opts.max_height = 20
+          --   opts.border = opts.border or 'rounded'
+          --   return orig_util_open_floating_preview(contents, syntax, opts, ...)
+          -- end
 
           -- The following code creates a keymap to toggle inlay hints in your
           -- code, if the language server you are using supports them
@@ -744,10 +744,15 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+
+      local vue_language_server_path = vim.fn.expand '$MASON/packages' .. '/vue-language-server' .. '/node_modules/@vue/language-server'
+
+      local home = os.getenv 'HOME'
+
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
+        pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -758,7 +763,6 @@ require('lazy').setup({
         -- ts_ls = {},
         --
         lua_ls = {
-          capabilities = capabilities,
           settings = {
             Lua = {
               workspace = {
@@ -826,130 +830,31 @@ require('lazy').setup({
             },
           },
         },
-        pylsp = {
-          capabilities = capabilities,
-          settings = {
-            pylsp = {
-              plugins = {
-                pyflakes = { enabled = true },
-                pycodestyle = { enabled = true },
-                autopep8 = { enabled = false },
-                yapf = { enabled = false },
-                mccabe = { enabled = true },
-                pylsp_mypy = { enabled = false },
-                pylsp_black = { enabled = false },
-                pylsp_isort = { enabled = false },
-              },
-            },
-          },
-        },
-        -- volar = {
-        --   -- single_file_support = true,
-        --   filetypes = { 'vue' },
-        --   init_options = {
-        --     vue = {
-        --       hybridMode = false,
-        --     },
-        --     emmet = { enable = false },
-        --   },
+        -- pylsp = {
         --   settings = {
-        --     javascript = {
-        --       inlayHints = {
-        --         enumMemberValues = {
-        --           enabled = true,
-        --         },
-        --         functionLikeReturnTypes = {
-        --           enabled = true,
-        --         },
-        --         propertyDeclarationTypes = {
-        --           enabled = true,
-        --         },
-        --         parameterTypes = {
-        --           enabled = true,
-        --           suppressWhenArgumentMatchesName = true,
-        --         },
-        --         variableTypes = {
-        --           enabled = true,
-        --         },
+        --     pylsp = {
+        --       plugins = {
+        --         pyflakes = { enabled = true },
+        --         pycodestyle = { enabled = true },
+        --         autopep8 = { enabled = false },
+        --         yapf = { enabled = false },
+        --         mccabe = { enabled = true },
+        --         pylsp_mypy = { enabled = false },
+        --         pylsp_black = { enabled = false },
+        --         pylsp_isort = { enabled = false },
         --       },
         --     },
         --   },
         -- },
-        -- vtsls = {
-        --   filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
-        --   capabilities = capabilities,
-        --   settings = {
-        --     typescript = {
-        --       inlayHints = {
-        --         parameterNames = { enabled = 'all' },
-        --         parameterTypes = { enabled = true },
-        --         variableTypes = { enabled = true },
-        --         propertyDeclarationTypes = { enabled = true },
-        --         functionLikeReturnTypes = { enabled = true },
-        --         enumMemberValues = { enabled = true },
-        --       },
-        --     },
-        --     javascript = {
-        --       inlayHints = {
-        --         parameterNames = { enabled = 'all' },
-        --         parameterTypes = { enabled = true },
-        --         variableTypes = { enabled = true },
-        --         propertyDeclarationTypes = { enabled = true },
-        --         functionLikeReturnTypes = { enabled = true },
-        --         enumMemberValues = { enabled = true },
-        --       },
-        --     },
-        --     vtsls = {
-        --       enableVueSupport = true,
-        --     },
-        --   },
-        -- },
-        ts_ls = {
-          init_options = {
-            plugins = {
-              {
-                name = '@vue/typescript-plugin',
-                location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
-                languages = { 'vue' },
-              },
-            },
-          },
-          single_file_support = false,
-          settings = {
-            typescript = {
-              inlayHints = {
-                includeInlayParameterNameHints = 'literal',
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = false,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              },
-            },
-            javascript = {
-              inlayHints = {
-                includeInlayParameterNameHints = 'all',
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              },
-            },
-          },
-        },
-
         html = {
-          filetype = { 'html', 'vue' },
+          filetype = { 'html' },
         },
         tailwindcss = {},
         cssls = {
           filetypes = { 'css', 'scss', 'less' },
         },
         emmet_ls = {
-          filetypes = { 'vue', 'css', 'html', 'javascript', 'javascriptreact', 'less', 'sass', 'scss', 'typescriptreact' },
+          filetypes = { 'css', 'html', 'javascript', 'less', 'sass', 'scss' },
         },
         gradle_ls = {},
         bashls = {},
@@ -989,9 +894,84 @@ require('lazy').setup({
             if server_name == 'jdtls' then
               return
             end
+            if server_name == 'ts_ls' then
+              return
+            end
+
+            -- if server_name == 'volar' then
+            --   return
+
+            -- end
 
             require('lspconfig')[server_name].setup(server)
           end,
+        },
+      }
+      local lspconfig = require 'lspconfig'
+
+      lspconfig.ts_ls.setup {
+        capabilities = capabilities,
+        init_options = {
+          plugins = {
+            {
+              name = '@vue/typescript-plugin',
+              location = vue_language_server_path,
+              -- location = vim.fn.stdpath 'data' .. '/mason/packages/vue-language-server/node_modules/@vue/language-server',
+              languages = { 'vue' },
+            },
+          },
+        },
+        filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+        settings = {
+          typescript = {
+            tsserver = {
+              useSyntaxServer = false,
+            },
+            inlayHints = {
+              includeInlayParameterNameHints = 'all',
+              includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+              includeInlayFunctionParameterTypeHints = true,
+              includeInlayVariableTypeHints = true,
+              includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+              includeInlayPropertyDeclarationTypeHints = true,
+              includeInlayFunctionLikeReturnTypeHints = true,
+              includeInlayEnumMemberValueHints = true,
+            },
+          },
+        },
+      }
+      lspconfig.volar.setup {
+        capabilities = capabilities,
+        filetypes = { 'vue' },
+        init_options = {
+          vue = {
+            hybridMode = false,
+          },
+          typescript = {
+            tsdk = vim.fn.expand '~/.local/share/fnm/node-versions/v22.15.0/installation/lib/node_modules/typescript/lib',
+          },
+        },
+        settings = {
+          typescript = {
+            inlayHints = {
+              enumMemberValues = {
+                enabled = true,
+              },
+              functionLikeReturnTypes = {
+                enabled = true,
+              },
+              propertyDeclarationTypes = {
+                enabled = true,
+              },
+              parameterTypes = {
+                enabled = true,
+                suppressWhenArgumentMatchesName = true,
+              },
+              variableTypes = {
+                enabled = true,
+              },
+            },
+          },
         },
       }
     end,
@@ -1111,7 +1091,7 @@ require('lazy').setup({
 
       completion = {
         menu = {
-          border = 'rounded',
+          -- border = 'rounded',
           winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
         },
         ghost_text = { enabled = true },
@@ -1122,12 +1102,25 @@ require('lazy').setup({
 
       sources = {
         default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        per_filetype = {
+          sql = { 'snippets', 'dadbod', 'buffer' },
+        },
         providers = {
+          dadbod = { name = 'Dadbod', module = 'vim_dadbod_completion.blink' },
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
         },
       },
 
       snippets = { preset = 'luasnip' },
+
+      -- enabled = function()
+      --   local ft = vim.bo.filetype
+      --
+      --   if ft == 'dbui' then
+      --     return false
+      --   end
+      --   return false
+      -- end,
 
       -- it work
       -- enabled = function()
@@ -1161,9 +1154,21 @@ require('lazy').setup({
     config = function()
       ---@diagnostic disable-next-line: missing-fields
       require('tokyonight').setup {
+        transparent = vim.g.transparent_enabled,
         styles = {
-          comments = { italic = false }, -- Disable italics in comments
+          comments = { italic = true }, -- Disable italics in comments
         },
+        on_colors = function(colors)
+          colors.hint = colors.orange
+          colors.error = '#ff0000'
+          --
+        end,
+        on_highlights = function(highlights, colors)
+          highlights.Comment = {
+            fg = '#cfffe5',
+            italic = true,
+          }
+        end,
       }
 
       -- Load the colorscheme here.
@@ -1227,18 +1232,6 @@ require('lazy').setup({
           filename = filename .. ' ●'
         end
         return filename
-      end
-
-      local function custom_lsp_info()
-        local buf_clients = vim.lsp.get_clients { bufnr = 0 }
-        if next(buf_clients) == nil then
-          return ''
-        end
-        local client_names = {}
-        for _, client in pairs(buf_clients) do
-          table.insert(client_names, client.name)
-        end
-        return 'LSP: ' .. table.concat(client_names, ', ')
       end
 
       MiniStatusline.setup {
@@ -1321,12 +1314,30 @@ require('lazy').setup({
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
+    config = function(_, opts)
+      require('nvim-treesitter.configs').setup(opts)
+
+      -- MDX
+      vim.filetype.add {
+        extension = {
+          mdx = 'mdx',
+        },
+      }
+      vim.treesitter.language.register('markdown', 'mdx')
+    end,
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
     --
     --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+  },
+  {
+    'nvim-treesitter/nvim-treesitter-context',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    config = function()
+      require('treesitter-context').setup()
+    end,
   },
   { 'mfussenegger/nvim-jdtls', ft = { 'java' }, dependencies = { 'neovim/nvim-lspconfig' } },
 
@@ -1340,7 +1351,7 @@ require('lazy').setup({
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
@@ -1378,6 +1389,8 @@ require('lazy').setup({
   },
 })
 
+vim.keymap.set('n', '<leader>rn', ':IncRename ')
+-- vim.lsp.set_log_level 'debug'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
 -- vim: ts=2 sts=2 sw=2 et

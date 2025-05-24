@@ -181,9 +181,21 @@ return {
     --     dap_python.setup '~/.virtualenvs/debugpy/bin/python'
     --   end,
     -- }
-    require('dap-python').setup '~/.virtualenvs/debugpy/bin/python'
+    local dap_python = require 'dap-python'
+    dap_python.setup '~/.virtualenvs/debugpy/bin/python'
+    dap.configurations.python = {
+      {
+        type = 'python',
+        request = 'attach',
+        name = 'Attach to process',
+        connect = {
+          host = '127.0.0.1',
+          port = 5678,
+        },
+        mode = 'remote',
+      },
+    }
 
-    -- dap.configurations.python = {}
     -- dap.configurations.javascript = {}
 
     dap.configurations.java = {
